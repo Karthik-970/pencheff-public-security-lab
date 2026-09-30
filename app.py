@@ -1,25 +1,27 @@
-from flask import Flask, request
+import os
+
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-# INTENTIONAL LAB FINDING:
-# Fake credential for testing secret detection.
-AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE"
-AWS_SECRET_ACCESS_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+# Credentials must never be hardcoded in source. Load them from the
+# environment (or a secrets manager) instead.
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
 
 @app.route("/")
 def home():
-    return "<h1>Pencheff Public Security Lab</h1>"
+    return render_template("index.html")
 
 
 @app.route("/search")
 def search():
     query = request.args.get("q", "")
 
-    # INTENTIONAL LAB FINDING:
-    # User-controlled input is inserted directly into HTML.
-    return f"<h2>Search result: {query}</h2>"
+    # Jinja2 autoescaping ensures user-controlled input is safely
+    # rendered rather than injected into raw HTML.
+    return render_template("search.html", query=query)
 
 
 if __name__ == "__main__":
